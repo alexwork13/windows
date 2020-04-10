@@ -1,0 +1,60 @@
+
+Run cmd as the MSA account using this article: Run as MSA\System
+
+Run powershell as that MSA by typing "powershell"
+
+Define this procedure by pasting the code bellow in the powershell prompt.
+
+Function
+----------------------------------------------------------------------------------
+function Test-SQLConnection
+{   
+    [OutputType([bool])]
+    Param
+    (
+        [Parameter(Mandatory=$true,
+                    ValueFromPipelineByPropertyName=$true,
+                    Position=0)]
+        $ConnectionString
+    )
+    try
+    {
+        $sqlConnection = New-Object System.Data.SqlClient.SqlConnection $ConnectionString;
+        $sqlConnection.Open();
+        $sqlConnection.Close();
+ 
+        return $true;
+    }
+    catch
+    {
+        return $false;
+    }
+}
+--------------------------------------------------------------------------------------------------------------
+Call the function like this and replace the Data source and the database if your using integrated security.
+
+Call the function
+----------------------------------------------------------------------------------------------------------------
+Test-SQLConnection "Data Source=nts-dub;database=db_NTS;Integrated Security=SSPI"
+-----------------------------------------------------------------------------------------------------------------
+Call the function like this if you are NOT using integrated security:
+----------------------------------------------------------------------------------------------------------------
+Test-SQLConnection "Data Source=localhost;database=myDB;User ID=myUser;Password=myPassword"
+-----------------------------------------------------------------------------------------------------------------
+
+Run as MSA\System
+
+When you need to run a certain program with a user which does not have a password, for example an MSA (Managed Service Account)
+or NT\System account, you can use PSexec from Sysinternal tools.
+n CMD, access the directory with the PSExec, and run : 
+
+-----------------------------------------
+PsExec.exe -u domain\MsaAccount$ cmd.exe
+-----------------------------------------
+
+Domain - The domain of the MSA, or NT for example if its the local System user.
+MSAAccount$ - the name of the user.
+cmd.exe - The program you want to open using the specified credentials.
+
+Notice that when you are prompt for a password, just press Enter - you do not need to enter any password for accounts which dont have one (like MSA, Local System, etc...).
+
